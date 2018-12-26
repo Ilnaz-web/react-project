@@ -71,7 +71,7 @@ class Monitor extends React.Component {
     if (devName !== '') queryFilter.push(devName);
     if (devOS !== '') queryFilter.push(devOS);
 
-    let data = {};
+    let data;
     let dataAll = {
     "version": true, "size": sizeLogs,"sort": [ {"@timestamp": { "order": "desc", "unmapped_type": "boolean"}}], "_source": {"excludes": [] },"query": {"bool": { "must": [  {"match_all": { } },],}},
     };
