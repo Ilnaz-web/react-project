@@ -55,7 +55,7 @@ class Search extends React.Component {
   }
 
   render () {
-    console.log(this.state.searchInput);
+    //console.log(this.state.searchInput);
     return (
       <div>
         <form onSubmit={this.onSubmit}>
@@ -83,8 +83,6 @@ class Search extends React.Component {
               );
             })}
           </ul>
-        
-        
       </div>
     );
   }
