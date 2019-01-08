@@ -1,4 +1,5 @@
 import React from 'react'
+import DataRow from './DataRow'
 
 class Monitor extends React.Component {
   constructor(props) {
@@ -23,23 +24,23 @@ class Monitor extends React.Component {
     this.sendRequestAllLogs(this.state);
   }
 
-  componentDidMount () {
-    this.timerID = setInterval(() => this.sendRequestAllLogs(this.state), 5000);
-  }
+  // componentDidMount () {
+  //   this.timerID = setInterval(() => this.sendRequestAllLogs(this.state), 5000);
+  // }
 
   componentWillUnmount () {
     clearInterval(this.timerID);
   }
 
   stopTimer = () => {
-    //this.setState({stopped: !this.state.stopped});
-    // if (this.state.stopped) {
-    //   clearInterval(this.timerID);
-    // }
-    // else {
-    //   this.timerID = setInterval(() => this.sendRequestAllLogs(this.state), 5000);
-    // };
-    clearInterval(this.timerID);
+    this.setState({stopped: !this.state.stopped}, () => {
+      if (this.state.stopped) {
+        clearInterval(this.timerID);
+      }
+      else {
+        this.timerID = setInterval(() => this.sendRequestAllLogs(this.state), 5000);
+      };
+    });
   }
 
   onSubmit = (event) => {
@@ -132,23 +133,12 @@ class Monitor extends React.Component {
 
   LogData = (data) => {
     if(data !== []) {
-      const logs = data.map((elem, i) => {
-        return (
-          <tr key={elem._id}>
-            <td>{elem._source.DT}</td>
-            <td>{elem._source.reqTS}</td>
-            <td>{elem._source.name}</td>
-            <td>{elem._source.httpRequest && elem._source.httpRequest.dev_id || ''}</td>
-            <td>{elem._source.httpRequest && elem._source.httpRequest.dev_name || ''}</td>
-            <td>{elem._source.httpRequest && elem._source.httpRequest.usr_phone || ''}</td>
-            <td>{elem._source.httpRequest && elem._source.httpRequest.remoteIp || ''}</td>
-            <td>{elem._source.httpRequest && elem._source.httpRequest.req_geo || ''}</td>
-            <td style={{fontSize: "0.68rem"}}>{elem._source.httpRequest && elem._source.httpRequest.requestUrl + ' ' + elem._source.httpRequest.location || ''}</td>
-            <td style={{fontSize: "0.68rem"}}>{elem._source.httpRequest && JSON.stringify(elem._source.httpRequest.query) || ''}</td>
-            <td style={{fontSize: "0.68rem"}}>{JSON.stringify(elem._source.params)}</td>
-            {/* <td style={{ fontSize: "0.55rem" }}>{JSON.stringify(elem._source.log)}</td> */}
-          </tr>
-        );
+      const logs = data.map((elem) => {
+        if(elem._source.httpRequest) {
+          return (
+            <DataRow data={elem} key={elem._id} />
+          );
+        }
       });
       return (
         <tbody style={{fontSize: "0.8rem"}}>{logs}</tbody>
@@ -195,7 +185,7 @@ class Monitor extends React.Component {
           </label>
           <p><input type="submit" value="Submit" className="btn btn-primary" /></p>
         </form>
-        <table className="table table-sm table-striped table-bordered">
+        <table className="table table-sm table-striped table-bordered table-hover">
           <thead>
             <tr>
               <th>Date</th>
@@ -205,7 +195,7 @@ class Monitor extends React.Component {
               <th>Dev_Name</th>
               <th>Phone</th>
               <th>Remote_IP</th>
-              <th>Req-geo</th>
+              {/* <th>Req-geo</th> */}
               <th>Location</th>
               <th>Query</th>
               <th>Params</th>
