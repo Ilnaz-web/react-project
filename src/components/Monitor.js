@@ -183,6 +183,19 @@ class Monitor extends React.Component {
     
   }
 
+  FilterLabel = (searchLabel) => {
+    let labels = [];
+    for(var key in searchLabel) {
+      if(key === "dataLogs" || key === "stopped" || key === "searchSize" ) continue;
+      labels.push(
+        <label key={key}> <span>{key.slice(6)} </span>
+          <input type="text" name={key} value={this.state[key]} onChange={this.onSearchChange} />
+        </label>
+      );
+    }
+    return labels;
+  }
+
   onSearchChange = (event) => {
     const name = event.target.getAttribute('name');
     this.setState({ [name]: event.target.value });
@@ -198,24 +211,7 @@ class Monitor extends React.Component {
             <input type="text" name="searchSize" value={this.state.searchSize} onChange={this.onSearchChange} />
             </label>
           </p>
-          <label> <span>Name: </span>
-            <input type="text" name="searchName" value={this.state.searchName} data-type="searchName" onChange={this.onSearchChange} />
-          </label>
-          <label> <span>reqTS: </span>
-            <input type="text" name="searchReqTS" value={this.state.searchReqTS} onChange={this.onSearchChange} />
-          </label>
-          <label> <span>Status: </span>
-            <input type="text" name="searchStatus" value={this.state.searchStatus} onChange={this.onSearchChange} />
-          </label>
-          <label> <span>Dev_Model: </span>
-            <input type="text" name="searchDevModel" value={this.state.searchDevModel} onChange={this.onSearchChange} />
-          </label>
-          <label> <span>Dev_Name: </span>
-            <input type="text" name="searchDevName" value={this.state.searchDevName} onChange={this.onSearchChange} />
-          </label>
-          <label> <span>Dev_OS: </span>
-            <input type="text" name="searchDevOS" value={this.state.searchDevOS} onChange={this.onSearchChange} />
-          </label>
+          {this.FilterLabel(this.state)}
           <p><input type="submit" value="Submit" className="btn btn-primary" /></p>
         </form>
         
