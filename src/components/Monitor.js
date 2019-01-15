@@ -4,29 +4,24 @@ import DataRow from './DataRow'
 class Monitor extends React.Component {
   constructor(props) {
     super(props);
-    const reqUrl = new URLSearchParams(this.props.location.search).get("reqTS");
-    const nameUrl = new URLSearchParams(this.props.location.search).get("name");
-    const statusUrl = new URLSearchParams(this.props.location.search).get("status");
-    const devModelUrl = new URLSearchParams(this.props.location.search).get("devModel");
-    const devNameUrl = new URLSearchParams(this.props.location.search).get("devName");
-    const devOsUrl = new URLSearchParams(this.props.location.search).get("devOS");
+    const searchUrl = new URLSearchParams(this.props.location.search);
     this.state = {
       searchSize: '200',
-      searchName: nameUrl || '',
-      searchReqTS: reqUrl || '',
-      searchStatus: statusUrl || '',
-      searchDevModel: devModelUrl || '',
-      searchDevName: devNameUrl || '',
-      searchDevOS: devOsUrl || '',
+      searchName: searchUrl.get("name") || '',
+      searchReqTS: searchUrl.get("reqTS") || '',
+      searchStatus: searchUrl.get("status") || '',
+      searchDevModel: searchUrl.get("devModel") || '',
+      searchDevName: searchUrl.get("devName") || '',
+      searchDevOS: searchUrl.get("devOS") || '',
       stopped: false,
       dataLogs: []
     }
-    this.sendRequestAllLogs(this.state);
+    this.sendRequestAllLogs();
   }
 
-  // componentDidMount () {
-  //   this.timerID = setInterval(() => this.sendRequestAllLogs(this.state), 5000);
-  // }
+  componentDidMount () {
+    this.timerID = setInterval(() => this.sendRequestAllLogs(), 5000);
+  }
 
   componentWillUnmount () {
     clearInterval(this.timerID);
@@ -38,7 +33,7 @@ class Monitor extends React.Component {
         clearInterval(this.timerID);
       }
       else {
-        this.timerID = setInterval(() => this.sendRequestAllLogs(this.state), 5000);
+        this.timerID = setInterval(() => this.sendRequestAllLogs(), 5000);
       };
     });
   }
@@ -52,66 +47,100 @@ class Monitor extends React.Component {
     let devOS = (this.state.searchDevOS !== '') ? 'devOS=' + this.state.searchDevOS + '&' : '';
     event.preventDefault();
     this.props.history.push(`/monitor?${nameLogs}${reqTS}${statusLog}${devModel}${devName}${devOS}`);
-    this.sendRequestAllLogs(this.state);
+    this.sendRequestAllLogs();
   }
 
-  sendRequestAllLogs = (filter) => {
-    let sizeLogs = filter.searchSize;
-    let nameLogs = (filter.searchName !== '') ? {"match_phrase": { "name": { "query": filter.searchName }}} : '';
-    let reqTS = (filter.searchReqTS !== '') ? {"match_phrase": { "reqTS": { "query": filter.searchReqTS }}} : '';
-    let statusLog = (filter.searchStatus !== '') ? {"match_phrase": { "httpRequest.status": { "query": filter.searchStatus }}} : '';
-    let devModel = (filter.searchDevModel !== '') ? {"match_phrase": { "httpRequest.dev_model": { "query": filter.searchDevModel }}} : '';
-    let devName = (filter.searchDevName !== '') ? {"match_phrase": {"httpRequest.dev_name": {"query": filter.searchDevName}}} : '';
-    let devOS = (filter.searchDevOS !== '') ? {"match_phrase": { "httpRequest.dev_os": { "query": filter.searchDevOS }}} : '';
-
+  sendRequestAllLogs = () => {
+    let sizeLogs = this.state.searchSize;
     let queryFilter = [];
-    if (nameLogs !== '') queryFilter.push(nameLogs);
-    if (reqTS !== '') queryFilter.push(reqTS);
-    if (statusLog !== '') queryFilter.push(statusLog);
-    if (devModel !== '') queryFilter.push(devModel);
-    if (devName !== '') queryFilter.push(devName);
-    if (devOS !== '') queryFilter.push(devOS);
-
     let data;
-    let dataAll = {
-    "version": true, "size": sizeLogs,"sort": [ {"@timestamp": { "order": "desc", "unmapped_type": "boolean"}}], "_source": {"excludes": [] },"query": {"bool": { "must": [  {"match_all": { } },],}},
-    };
-    let dataFilter = {
-      "version": true,
-      "size": sizeLogs,
-      "sort": [
-        {
-          "@timestamp": {
-            "order": "desc",
-            "unmapped_type": "boolean"
-          }
-        }
-      ],
-      "_source": {
-        "excludes": [
-        ]
-      },
-      "query": {
-        "bool": {
-          "must": [
-            {
-              "match_all": {
-              }
-            },
-            queryFilter
-          ],
-        }
-      },
-    };
+
+    if (this.state.searchName !== '') queryFilter.push({ "match_phrase": { "name": { "query": this.state.searchName } } });
+    if (this.state.searchReqTS !== '') queryFilter.push({ "match_phrase": { "reqTS": { "query": this.state.searchReqTS } } });
+    if (this.state.searchStatus !== '') queryFilter.push({ "match_phrase": { "httpRequest.status": { "query": this.state.searchStatus } } });
+    if (this.state.searchDevModel !== '') queryFilter.push({ "match_phrase": { "httpRequest.dev_model": { "query": this.state.searchDevModel } } });
+    if (this.state.searchDevName !== '') queryFilter.push({ "match_phrase": { "httpRequest.dev_name": { "query": this.state.searchDevName } } });
+    if (this.state.searchDevOS !== '') queryFilter.push({ "match_phrase": { "httpRequest.dev_os": { "query": this.state.searchDevOS } } });
+
     if (queryFilter.length !== 0) {
-      data = dataFilter;
+      data = {
+        "version": true,
+        "size": sizeLogs,
+        "sort": [
+          {
+            "@timestamp": {
+              "order": "desc",
+              "unmapped_type": "boolean"
+            }
+          }
+        ],
+        "_source": {
+          "excludes": [
+          ]
+        },
+        "query": {
+          "bool": {
+            "must": [
+              {
+                "match_all": {
+                }
+              },
+              {
+                "match_phrase":
+                {
+                  "_index":
+                  {
+                    "query": "default*"
+                  }
+                }
+              },
+              queryFilter
+            ],
+          }
+        },
+      };
       console.log(queryFilter);
-    } else {
-      data = dataAll;
+    } 
+    else {
+      data = {
+        "version": true,
+        "size": sizeLogs,
+        "sort": [
+          {
+            "@timestamp":
+            {
+              "order": "desc",
+              "unmapped_type": "boolean"
+            }
+          }
+        ],
+        "_source":
+        {
+          "excludes": []
+        },
+        "query":
+        {
+          "bool":
+          {
+            "must": [
+              {
+                "match_all": {}
+              },
+              {
+                "match_phrase":
+                {
+                  "_index":
+                  {
+                    "query": "default*"
+                  }
+                }
+              }
+            ],
+          }
+        },
+      };
     };
 
-
-    // fetch('https://es-alpha.simplanum.com/_search?sort=@timestamp:desc&q=_type:fluentd' + nameLogs + reqTS + devName +'&size=' + sizeLogs)
     fetch('https:///es-alpha.simplanum.com/_search', {
       method: 'POST',
       headers: {  
@@ -132,13 +161,11 @@ class Monitor extends React.Component {
   }
 
   LogData = (data) => {
-    if(data !== []) {
-      const logs = data.map((elem) => {
-        if(elem._source.httpRequest) {
+    if(data.length !== 0) {
+      const logs = data.map((elem, i) => {
           return (
-            <DataRow data={elem} key={elem._id} />
+            <DataRow data={elem} index={i} key={elem._id} />
           );
-        }
       });
       return (
         <tbody style={{fontSize: "0.8rem"}}>{logs}</tbody>
@@ -146,7 +173,11 @@ class Monitor extends React.Component {
     }
     else {
       return (
-        <p>Not data</p>
+        <tbody>
+          <tr>
+            <td colSpan="10" align="center">Not data</td>
+          </tr>
+        </tbody>
       );
     }
     
@@ -160,11 +191,13 @@ class Monitor extends React.Component {
   render () {
     return (
       <div>
+        <button className='btn' onClick={this.stopTimer}>{this.state.stopped ? 'Play' : 'Stop'}</button>
         <form onSubmit={this.onSubmit}>
-          <p><label><span> Number of Logs:  </span>
+          <p>
+            <label><span> Number of Logs:  </span>
             <input type="text" name="searchSize" value={this.state.searchSize} onChange={this.onSearchChange} />
-          </label>
-          <button className='btn' onClick={this.stopTimer}>{this.state.stopped?'Play':'Stop'}</button></p>
+            </label>
+          </p>
           <label> <span>Name: </span>
             <input type="text" name="searchName" value={this.state.searchName} data-type="searchName" onChange={this.onSearchChange} />
           </label>
@@ -185,9 +218,11 @@ class Monitor extends React.Component {
           </label>
           <p><input type="submit" value="Submit" className="btn btn-primary" /></p>
         </form>
+        
         <table className="table table-sm table-striped table-bordered table-hover">
           <thead>
             <tr>
+              <th>Index</th>
               <th>Date</th>
               <th>ReqTS</th>
               <th>Name</th>
@@ -195,11 +230,9 @@ class Monitor extends React.Component {
               <th>Dev_Name</th>
               <th>Phone</th>
               <th>Remote_IP</th>
-              {/* <th>Req-geo</th> */}
               <th>Location</th>
               <th>Query</th>
-              <th>Params</th>
-              {/* <th>Logs</th> */}
+              {/* <th>Params</th> */}
             </tr>
           </thead>
           {this.LogData(this.state.dataLogs)}

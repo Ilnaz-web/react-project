@@ -1,6 +1,4 @@
 import React from 'react'
-//import {Link, Switch, Route, BrowserRouter} from 'react-router-dom'
-
 
 class Search extends React.Component {
   constructor(props){
@@ -11,43 +9,88 @@ class Search extends React.Component {
       data: []
     }
     
-    if (this.state.searchInput !== '') this.sendRequest(this.state.searchInput);
+    if (this.state.searchInput !== '') this.sendRequest();
   }
 
   componentWillReceiveProps (nextProps) {
     const reqUrl = new URLSearchParams(this.props.location.search).get("reqTS");
     if (reqUrl !== '' ) {
-      this.setState((prevState, props) => ({ searchInput: prevState.searchInput }));
-      //console.log(this.state.searchInput);
-      this.sendRequest(this.state.searchInput);
+      this.setState((prevState, props) => ({ searchInput: reqUrl }));
+      this.sendRequest();
     } 
   }
   
   onSubmit = (event) => {
-    //console.log(this.state.searchInput);
-    let reqTS = this.state.searchInput;
     event.preventDefault();
-    if (reqTS!=='') {
-      this.props.history.push(`/search?reqTS=${reqTS}`);
+    if (this.state.searchInput !== '') {
+      this.props.history.push(`/search?reqTS=${this.state.searchInput}`);
 
     } else console.log('Not reqTS');
     
   }
 
-  sendRequest = (reqTS) => {
-    fetch('https://es-alpha.simplanum.com/_search?q=reqTS:' + reqTS)
+  sendRequest = () => {
+    let data = {
+      "version": true,
+      "size": 100,
+      "sort": [
+        {
+          "@timestamp": {
+            "order": "desc",
+            "unmapped_type": "boolean"
+          }
+        }
+      ],
+      "_source": {
+        "excludes": [
+        ]
+      },
+      "query": {
+        "bool": {
+          "must": [
+            {
+              "match_all": {
+              }
+            },
+            {
+              "match_phrase":
+              {
+                "_index":
+                {
+                  "query": "default*"
+                }
+              }
+            },
+            { 
+              "match_phrase": 
+              { 
+                "reqTS": 
+                { 
+                  "query": this.state.searchInput 
+                } 
+              } 
+            }
+          ],
+        }
+      },
+    };
+    fetch('https:///es-alpha.simplanum.com/_search', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json, text/plain, */*',
+        'Content-type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
       .then((response) => {
-        //console.log(response.status);
         return response.json();
       })
       .then((json) => {
-        //console.log(json.hits.hits);
+        console.log(json.hits.hits);
         let logArr = json.hits.hits;
         this.setState({ data: logArr });
-        // console.log(this.state.data);
       })
       .catch(alert);
-      //console.log(this.props.history.location.search);
   }
 
   onSearchChange = (event) => {
@@ -64,6 +107,7 @@ class Search extends React.Component {
             </label></p>
           <p><input type="submit" value="Submit" className="btn btn-primary" /></p>
         </form>
+        <h3>ReqTS: {this.state.searchInput}</h3>
          <ul>
             {this.state.data.map((elem) => {
               return (
