@@ -7,12 +7,12 @@ class Monitor extends React.Component {
     const searchUrl = new URLSearchParams(this.props.location.search);
     this.state = {
       searchSize: '200',
-      searchName: searchUrl.get("Name") || '',
       searchReqTS: searchUrl.get("ReqTS") || '',
+      searchName: searchUrl.get("Name") || '',
       searchStatus: searchUrl.get("Status") || '',
-      searchDevModel: searchUrl.get("DevModel") || '',
-      searchDevName: searchUrl.get("DevName") || '',
-      searchDevOS: searchUrl.get("DevOS") || '',
+      searchDevID: searchUrl.get("DevID") || '',
+      searchUserID: searchUrl.get("UserID") || '',
+      searchUserPhone: searchUrl.get("UserPhone") || '',
       stopped: false,
       dataLogs: []
     }
@@ -58,9 +58,9 @@ class Monitor extends React.Component {
     if (this.state.searchName !== '') queryFilter.push({ "match_phrase": { "name": { "query": this.state.searchName } } });
     if (this.state.searchReqTS !== '') queryFilter.push({ "match_phrase": { "reqTS": { "query": this.state.searchReqTS } } });
     if (this.state.searchStatus !== '') queryFilter.push({ "match_phrase": { "httpRequest.status": { "query": this.state.searchStatus } } });
-    if (this.state.searchDevModel !== '') queryFilter.push({ "match_phrase": { "httpRequest.dev_model": { "query": this.state.searchDevModel } } });
-    if (this.state.searchDevName !== '') queryFilter.push({ "match_phrase": { "httpRequest.dev_name": { "query": this.state.searchDevName } } });
-    if (this.state.searchDevOS !== '') queryFilter.push({ "match_phrase": { "httpRequest.dev_os": { "query": this.state.searchDevOS } } });
+    if (this.state.searchDevID !== '') queryFilter.push({ "match_phrase": { "httpRequest.dev_id": { "query": this.state.searchDevID } } });
+    if (this.state.searchUserID !== '') queryFilter.push({ "match_phrase": { "httpRequest.usr_id": { "query": this.state.searchUserID } } });
+    if (this.state.searchUserPhone !== '') queryFilter.push({ "match_phrase": { "httpRequest.usr_phone": { "query": this.state.searchUserPhone } } });
 
     if (queryFilter.length !== 0) {
       data = {
@@ -219,15 +219,15 @@ class Monitor extends React.Component {
             <tr>
               <th>Index</th>
               <th>Date</th>
-              <th>ReqTS</th>
               <th>Name</th>
+              <th>ReqTS</th>
               <th>Dev_ID</th>
               <th>Dev_Name</th>
-              <th>Phone</th>
+              <th>User_ID</th>
+              <th>User_Phone</th>
               <th>Remote_IP</th>
-              <th>Location</th>
+              <th>Status</th>
               <th>Query</th>
-              {/* <th>Params</th> */}
             </tr>
           </thead>
           {this.LogData(this.state.dataLogs)}

@@ -54,15 +54,16 @@ class DataRow extends React.Component {
       <React.Fragment>
         <tr key={elem._id} onClick={this.viewJSON} id={elem._id} >
           <td align="center">{this.props.index}</td>
-          <td>{(elem._source.httpRequest) ? elem._source.DT : 'Not date'}</td>
+          <td>{(elem._source.httpRequest) ? elem._source.DT : '-'}</td>
+          <td>{(elem._source.name) ? elem._source.name : '-'}</td>
           <td>{(elem._source.httpRequest) ? elem._source.reqTS : elem._source.req_ts || String(elem._source.reqTS)}</td>
-          <td>{(elem._source.name) ? elem._source.name : 'Not name'}</td>
-          <td>{(elem._source.httpRequest) ? elem._source.httpRequest.dev_id : elem._source.dev_id}</td>
-          <td>{(elem._source.httpRequest) ? elem._source.httpRequest.dev_name : elem._source.dev_name}</td>
-          <td>{(elem._source.httpRequest) ? elem._source.httpRequest.usr_phone : elem._source.usr_phone}</td>
-          <td>{(elem._source.httpRequest) ? elem._source.httpRequest.remoteIp : elem._source.remoteIp}</td>
-          <td style={{ fontSize: "0.68rem" }}>{(elem._source.httpRequest) ? (elem._source.httpRequest.requestUrl + ' ' + elem._source.httpRequest.location) : elem._source.request_uri}</td>
-          <td style={{ fontSize: "0.68rem" }}>{(elem._source.httpRequest) ? JSON.stringify(elem._source.httpRequest.query) :'Not query'}</td>
+          <td>{(elem._source.httpRequest) ? elem._source.httpRequest.dev_id : elem._source.dev_id || '-'}</td>
+          <td>{(elem._source.httpRequest) ? elem._source.httpRequest.dev_name : elem._source.dev_name || '-'}</td>
+          <td>{(elem._source.httpRequest) ? elem._source.httpRequest.usr_id : 'Not User_ID'}</td>
+          <td>{(elem._source.httpRequest) ? elem._source.httpRequest.usr_phone : elem._source.usr_phone || '-'}</td>
+          <td>{(elem._source.httpRequest) ? elem._source.httpRequest.remoteIp : elem._source.remoteIp || '-'}</td>
+          <td>{(elem._source.httpRequest) ? elem._source.httpRequest.status : '-'}</td>
+          <td style={{ fontSize: "0.68rem" }}>{(elem._source.httpRequest) ? JSON.stringify(elem._source.httpRequest.query) :'-'}</td>
         </tr>
         {this.renderModal()}
       </React.Fragment>
