@@ -55,7 +55,7 @@ class DataRow extends React.Component {
         <tr key={elem._id} onClick={this.viewJSON} id={elem._id} >
           <td align="center">{this.props.index}</td>
           <td>{(elem._source.httpRequest) ? elem._source.DT : 'Not date'}</td>
-          <td>{(elem._source.httpRequest) ? elem._source.reqTS : elem._source.req_ts}</td>
+          <td>{(elem._source.httpRequest) ? elem._source.reqTS : elem._source.req_ts || String(elem._source.reqTS)}</td>
           <td>{(elem._source.name) ? elem._source.name : 'Not name'}</td>
           <td>{(elem._source.httpRequest) ? elem._source.httpRequest.dev_id : elem._source.dev_id}</td>
           <td>{(elem._source.httpRequest) ? elem._source.httpRequest.dev_name : elem._source.dev_name}</td>

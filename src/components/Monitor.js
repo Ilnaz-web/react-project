@@ -7,12 +7,12 @@ class Monitor extends React.Component {
     const searchUrl = new URLSearchParams(this.props.location.search);
     this.state = {
       searchSize: '200',
-      searchName: searchUrl.get("name") || '',
-      searchReqTS: searchUrl.get("reqTS") || '',
-      searchStatus: searchUrl.get("status") || '',
-      searchDevModel: searchUrl.get("devModel") || '',
-      searchDevName: searchUrl.get("devName") || '',
-      searchDevOS: searchUrl.get("devOS") || '',
+      searchName: searchUrl.get("Name") || '',
+      searchReqTS: searchUrl.get("ReqTS") || '',
+      searchStatus: searchUrl.get("Status") || '',
+      searchDevModel: searchUrl.get("DevModel") || '',
+      searchDevName: searchUrl.get("DevName") || '',
+      searchDevOS: searchUrl.get("DevOS") || '',
       stopped: false,
       dataLogs: []
     }
@@ -39,19 +39,19 @@ class Monitor extends React.Component {
   }
 
   onSubmit = (event) => {
-    let nameLogs = (this.state.searchName !== '') ? 'name=' + this.state.searchName + '&' : '';
-    let reqTS = (this.state.searchReqTS !== '') ? 'reqTS=' + this.state.searchReqTS + '&' : '';
-    let statusLog = (this.state.searchStatus !== '') ? 'status=' + this.state.searchStatus + '&' : '';
-    let devModel = (this.state.searchDevModel !== '') ? 'devModel=' + this.state.searchDevModel + '&' : '';
-    let devName = (this.state.searchDevName !== '') ? 'devName=' + this.state.searchDevName + '&' : '';
-    let devOS = (this.state.searchDevOS !== '') ? 'devOS=' + this.state.searchDevOS + '&' : '';
+    let searchUrl = '';
+    for (var key in this.state) {
+      if (key === "dataLogs" || key === "stopped" || key === "searchSize") continue;
+      if (this.state[key] !== '') {
+        searchUrl += key.slice(6) + '='  + this.state[key] + '&'
+      };
+    }
     event.preventDefault();
-    this.props.history.push(`/monitor?${nameLogs}${reqTS}${statusLog}${devModel}${devName}${devOS}`);
+    this.props.history.push(`/monitor?${searchUrl}`);
     this.sendRequestAllLogs();
   }
 
   sendRequestAllLogs = () => {
-    let sizeLogs = this.state.searchSize;
     let queryFilter = [];
     let data;
 
@@ -65,7 +65,7 @@ class Monitor extends React.Component {
     if (queryFilter.length !== 0) {
       data = {
         "version": true,
-        "size": sizeLogs,
+        "size": this.state.searchSize,
         "sort": [
           {
             "@timestamp": {
@@ -104,7 +104,7 @@ class Monitor extends React.Component {
     else {
       data = {
         "version": true,
-        "size": sizeLogs,
+        "size": this.state.searchSize,
         "sort": [
           {
             "@timestamp":
@@ -154,8 +154,7 @@ class Monitor extends React.Component {
       })
       .then((json) => {
         console.log(json.hits.hits);
-        let logArr = json.hits.hits;
-        this.setState({ dataLogs: logArr });
+        this.setState({ dataLogs: json.hits.hits });
       })
       .catch(alert);
   }
